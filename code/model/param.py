@@ -1,7 +1,14 @@
 import numpy as np
 from utils import _
 
+# population strata:
+# - r = risk (3) low, medium, high
+# - s = seroconcordance (1+3) none/chance, main, casu, once
+# - h = health (3) susceptible, asymptomatic, symptomatic
+# plus p = partnership types (3) main, casu, once
+
 def get_all():
+  # create a dict of all model [P]arameters
   P = {}
   # independent
   P['N0']    = 100
