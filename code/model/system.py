@@ -24,11 +24,12 @@ def run(P,tvec):
   return {
     'P': P,
     'X': X,
-    't': tvec,
+    'foi': foi,
+    'tvec': tvec,
   }
 
 def get_mix(M_pr,P):
-  # define population-level mixing matrix from M_pr
+  # define population-level [M]ixing matrix from M_pr
   M0_prr = M_pr[:,:,_] * M_pr[:,_,:] / M_pr.sum(axis=1)[:,_,_] + tol # random
   # TODO: mixing
   return M0_prr # (p:3,r:3,r':3)
