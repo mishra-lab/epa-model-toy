@@ -1,16 +1,26 @@
 import numpy as np
-from scipy.integrate import solve_ivp
 from utils import _
 
 tol = 1e-9
 
-def get_tvec(t0=1985,tf=2025,dt=1):
+def get_tvec(t0=1985,tf=2025,dt=.1):
   return np.arange(t0,tf+dt,dt)
+
+def init_X(X0,tvec):
+  X = np.nan * np.ndarray([tvec.size,*X0.shape])
+  X[0] = X0
+  return X
 
 def run(P,tvec):
   # solve the model & collect outputs in [R]esults dict
-  S = solve_ivp(get_dX,tvec[[0,-1]],P['X0'].flatten(),t_eval=tvec,args=(P,))
-  X = S['y'].T.reshape((len(tvec),*P['X0'].shape)) # reshape so t-dimension is first
+  X   = init_X(P['X0'],tvec) # (r:3,s:4,h:3)
+  foi = init_X(np.zeros((3,3,3,3)),tvec) # (p:3,r:3,r':3,h':3)
+  for i in range(1,tvec.size):
+    Ri = get_dX(X[i-1],tvec[i-1],P)
+    X[i] = X[i-1] + (tvec[i] - tvec[i-1]) * Ri['dX']
+    foi[i] = Ri['foi']
+    if np.any(X[i].sum(axis=1) < 0) or np.any(foi[i] < 0): # abort / fail
+      raise Exception('model.run() failed at t = {}'.format(tvec[i]))
   return {
     'P': P,
     'X': X,
@@ -23,7 +33,7 @@ def get_mix(M_pr,P):
   # TODO: mixing
   return M0_prr # (p:3,r:3,r':3)
 
-def get_foi(t,X,P):
+def get_foi(X,t,P):
   # (p:3,r:3,r':3,h':3)
   # M = total partnerships 'offered'
   M_prh = (X[_,:,:,:] * P['K_prs'][:,:,:,_]).sum(axis=2) # (p:3,r:3,h:3)
@@ -35,11 +45,10 @@ def get_foi(t,X,P):
   Fbeta = P['beta_ph'] * P['freq_p'][:,_] # transmission rate per partnership
   return Fbeta[:,_,_,:] * M_prr[:,:,:,_] * Ph_pr[:,:,0,_,_] * Ph_pr[:,_,:,:] # (p:3,r:3,r':3,h':3)
 
-def get_dX(t,X,P):
-  X = X.reshape(P['X0'].shape) # (r:3,s:4,h:3)
+def get_dX(X,t,P):
   dX = 0*X
   # force of infection (EPA)
-  foi = get_foi(t,X,P) # (p:3,r:3,r':3,h':3)
+  foi = get_foi(X,t,P) # (p:3,r:3,r':3,h':3)
   dXi = foi.sum(axis=(2,3)) # acquisition (p:3,r:3)
   dX[:,0 ,0] -= dXi.sum(axis=0) # remove newly infected from s'=0
   dX[:,1:,1] += np.moveaxis(dXi,0,1) # add newly infected to s'=p
@@ -57,4 +66,7 @@ def get_dX(t,X,P):
   dX[:,:,1] -= dXi
   dX[:,:,2] += dXi
   # TODO: turnover
-  return dX.flatten()
+  return {
+    'dX': dX,
+    'foi': foi,
+  }
