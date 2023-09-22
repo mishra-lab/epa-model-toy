@@ -1,5 +1,5 @@
 import numpy as np
-from utils import _
+from utils import _,deco
 
 tol = 1e-9
 
@@ -16,7 +16,7 @@ def run(P,tvec):
   X   = init_X(P['X0'],tvec) # (r:3,s:4,h:3)
   foi = init_X(np.zeros((3,3,3,3)),tvec) # (p:3,r:3,r':3,h':3)
   for i in range(1,tvec.size):
-    Ri = get_dX(X[i-1],tvec[i-1],P)
+    Ri = get_dX(X[i-1],tvec[i-1],tvec[i],P)
     X[i] = X[i-1] + (tvec[i] - tvec[i-1]) * Ri['dX']
     foi[i] = Ri['foi']
     if np.any(X[i].sum(axis=1) < 0) or np.any(foi[i] < 0): # abort / fail
@@ -45,6 +45,7 @@ def get_foi(X,t,P):
   Fbeta = P['beta_ph'] * P['freq_p'][:,_] # transmission rate per partnership
   return Fbeta[:,_,_,:] * M_prr[:,:,:,_] * Ph_pr[:,:,0,_,_] * Ph_pr[:,_,:,:] # (p:3,r:3,r':3,h':3)
 
+@deco.rk4
 def get_dX(X,t,P):
   dX = 0*X
   # force of infection (EPA)
