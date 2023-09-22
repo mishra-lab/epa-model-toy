@@ -1,4 +1,5 @@
 import warnings
+import numpy as np
 
 def nowarn(fun):
   # suppress warnings while running fun
@@ -7,6 +8,14 @@ def nowarn(fun):
       warnings.simplefilter('ignore')
       result = fun(*args,**kwds)
       return result
+  return decorator
+
+def nanzero(fun):
+  # replace nans with 0 in the return of fun
+  def decorator(*args,**kwds):
+    result = nowarn(fun)(*args,**kwds)
+    result[np.isnan(result)] = 0
+    return result
   return decorator
 
 def Rmap(args=['X']):
