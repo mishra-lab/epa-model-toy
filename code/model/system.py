@@ -60,14 +60,17 @@ def get_dX(X,t,P):
   dXi = X[1:,:,:] / P['dur_p'][:,_,_] # partnership change (s:3,r:3,h:3)
   dX[1:,:,:] -= dXi # remove partner changers from s'=p,h
   dX[0 ,:,:] += dXi.sum(axis=0) # add partners changers to s'=0,h
-  # births & deaths
-  dX[0,:,0] += X.sum() * P['birth'] * P['PX0_r'] # all susceptible & s'=0
-  dX -= X * P['death'] # everybody
+  # entry & exit
+  dX[0,:,0] += X.sum() * P['entry'] * P['PXe_r'] # all susceptible & s'=0
+  dX -= X * P['exit'] # everybody
+  # turnover
+  dXi = X[:,:,_,:] * P['turn_rr'][_,:,:,_]
+  dX -= dXi.sum(axis=2)
+  dX += dXi.sum(axis=1)
   # health transitions
   dXi = X[:,:,1] / P['dur_h']
   dX[:,:,1] -= dXi
   dX[:,:,2] += dXi
-  # TODO: turnover
   return {
     'dX': dX,
     'foi': foi,
