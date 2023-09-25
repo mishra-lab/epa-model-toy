@@ -11,6 +11,12 @@ def aggratio(X1,X2,aggr,axis):
     return X1 / X2
 
 @deco.Rmap(args=['X'])
+def PX(X,r=None,h=None,aggr=True):
+  X2 = X.sum(axis=1)
+  X1 = xdi(X2,{1:r,2:h})
+  return aggratio(X1,X2,aggr,axis=(1,2))
+
+@deco.Rmap(args=['X'])
 def prevalence(X,r=None,aggr=True):
   # X: (t:*,s:4,r:3,h:3)
   X = xdi(X.sum(axis=1),{1:r})
