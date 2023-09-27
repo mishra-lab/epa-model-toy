@@ -25,12 +25,12 @@ def prevalence(X,r=None,aggr=True):
   return aggratio(X1,X2,aggr,axis=1)
 
 @deco.Rmap(args=['X','foi'])
-def incidence(X,foi,r=None,aggr=True):
+def incidence(X,foi,p=None,r=None,aggr=True):
   # foi: (t:*,p:3,r:3,r':3,h':3)
-  foi = foi.sum(axis=(1,3,4))
-  X1 = xdi(foi,{1:r}) # new infections
-  X2 = xdi(X[:,0,:,0],{1:r}) # susceptible
-  return aggratio(X1,X2,aggr,axis=1)
+  foi = foi.sum(axis=(3,4))
+  X1 = xdi(foi,{1:p,2:r}) # new infections
+  X2 = xdi(X[:,_,0,:,0],{2:r}) # susceptible
+  return aggratio(X1,X2,aggr,axis=(1,2))
 
 @deco.nanzero
 @deco.Rmap(args=['X','P'])
