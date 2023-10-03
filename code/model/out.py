@@ -34,9 +34,9 @@ def incidence(X,foi,p=None,r=None,aggr=True):
 
 @deco.nanzero
 @deco.Rmap(args=['X','P'])
-def tdsc(X,P,p=None,r=None,aggr=True):
+def tdsc(X,P,p=None,r=None,sus=False,aggr=True):
   # transmission-driven seroconcordance proportion
-  X = X.sum(axis=3)
+  X = (X if sus else X[:,:,:,1:]).sum(axis=3) # only inf or sus too
   X1 = xdi(X[:,1:,:],{1:p,2:r}) # seroconcordant partnerships
   X2 = xdi(X.sum(axis=1,keepdims=1) * P['K_pr'][_,:,:],{1:p,2:r}) # total partnerships
   return aggratio(X1,X2,aggr,axis=(1,2))
