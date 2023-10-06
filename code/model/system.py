@@ -3,7 +3,7 @@ from utils import _,deco
 
 tol = 1e-9
 
-def get_tvec(t0=1985,tf=2025,dt=.1):
+def get_tvec(t0=1985,tf=2035,dt=.1):
   return np.arange(t0,tf+dt,dt)
 
 def init_X(X0,tvec):
@@ -43,7 +43,7 @@ def get_foi(X,t,P):
   # Ph_pr = distribution of health states for each partnership type & risk group
   Ph_pr = M_prh / (M_pr[:,:,_] + tol)
   M_prr = get_mix(M_pr,P) # (p:3,r:3,r':3)
-  Fbeta = P['beta_ph'] * P['freq_p'][:,_] # transmission rate per partnership
+  Fbeta = P['Rbeta_t'](t) * P['beta_ph'] * P['freq_p'][:,_] # transmission rate per partnership
   return Fbeta[:,_,_,:] * M_prr[:,:,:,_] * Ph_pr[:,:,0,_,_] * Ph_pr[:,_,:,:] # (p:3,r:3,r':3,h':3)
 
 @deco.rk4

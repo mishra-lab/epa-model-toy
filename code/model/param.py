@@ -1,5 +1,6 @@
 import numpy as np
 from utils import _
+import utils.tarray as ta
 
 # population strata:
 # - s = seroconcordance (1+3) none/chance, main, casu, once
@@ -18,6 +19,8 @@ def get_all():
   P['K_pr']  = np.array([[1,1,1],[0,2,2],[0,2,100]]) # num partners
   P['aK_ps'] = np.array([[0,1,0,0],[0,0,1,0],[0,0,0,1]]) # seroc adjust
   P['beta']  = .0006 # prob transm per sex
+  P['Rbeta_t'] = ta.tarray([1985,2000,2025,2050,2051],
+                           [1.00,1.00,0.20,0.10,0.10]) # relative prob: time
   P['Rbeta_h'] = np.array([0,1,5]) # relative prob: health
   P['Rbeta_p'] = np.array([1,.5,.5]) # relative prob: partner
   P['freq_p']  = np.array([100,30,10]) # sex freq per partner

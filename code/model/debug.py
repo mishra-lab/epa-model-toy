@@ -5,6 +5,8 @@ tvec = system.get_tvec()
 P = param.get_all()
 R = system.run(P,tvec)
 
+plot.debug(tvec,ylab='Relative Probability of Transmission',
+  outs={'':P['Rbeta_t'](tvec)})
 plot.debug(tvec,ylab='Population Proportion by Risk Group',
   outs={'r = {}'.format(r):out.PX(R,r=r) for r in (None,0,1,2)})
 plot.debug(tvec,ylab='Prevalence by Risk Group',
